@@ -93,7 +93,7 @@ void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx(ofxArtNetDmxData& dmx) {
-	sendDmx(dmx.port, " " ,dmx.data, dmx.len);
+	sendDmx(dmx.port, dmx.ipTarget ,dmx.data, dmx.len);
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmxRaw(int universe, void* data, int size) {

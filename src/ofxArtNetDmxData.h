@@ -20,9 +20,11 @@ public:
 	
 	void allocate(int len);
 	void destroy();
-	void set(unsigned char val);
+    void set(unsigned char val);
+    void setIp(const char* ip){ipTarget = ip;};
 	
 	unsigned char* data;
+    const char* ipTarget;
 	int len;
 	int port;
 };

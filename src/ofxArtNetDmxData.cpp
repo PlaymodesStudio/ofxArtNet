@@ -14,12 +14,14 @@
 ofxArtNetDmxData::ofxArtNetDmxData(int len) {
 	allocate(len);
 	port = 0;
+    ipTarget = " ";
 }
 //-----------------------------------------------------
 ofxArtNetDmxData::ofxArtNetDmxData(unsigned char* data, int len) {
 	this->data = data;
 	this->len = len;
 	this->port = 0;
+    ipTarget = " ";
 }
 //-----------------------------------------------------
 ofxArtNetDmxData::~ofxArtNetDmxData() {
