@@ -51,7 +51,7 @@ public:
 	
 	void init(string ip = "", bool verbose = false);
 
-	void setOEM(uint8 high, uint8 low);
+	void setOEM(int high, int low);
 	void setNodeType(artnetNodeType nodeType);
 	void setShortName(string shortName);
 	void setLongName(string longName);
@@ -59,14 +59,14 @@ public:
 	void setBroadcastLimit(int bcastlimit);
 	
 	void setPortType(int port, artnetPortIO io, artnetPortData data);
-	void setPortAddress(int port, artnetPortType portType, uint8_t address);
+	void setPortAddress(int port, artnetPortType portType, unsigned char address);
 	
 	void start();
 	void stop();
 	void close();
 	
 	void sendPoll(string ip = "");
-	void sendDmx(int port, void* data, int size);
+	void sendDmx(int port, const char* targetIp, void* data, int size);
 	void sendDmx(ofxArtNetDmxData& dmx);
 	void sendDmxRaw(int universe, void* data, int size);
 	void sendAddress(ofxArtNetNodeEntry* entry);

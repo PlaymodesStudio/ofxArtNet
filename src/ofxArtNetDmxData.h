@@ -15,14 +15,14 @@ class ofxArtNetDmxData {
 public:
 	
 	ofxArtNetDmxData(int len = 512);
-	ofxArtNetDmxData(uint8_t* data, int len);
+	ofxArtNetDmxData(unsigned char* data, int len);
 	~ofxArtNetDmxData();
 	
 	void allocate(int len);
 	void destroy();
-	void set(uint8_t val);
+	void set(unsigned char val);
 	
-	uint8_t* data;
+	unsigned char* data;
 	int len;
 	int port;
 };

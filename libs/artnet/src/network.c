@@ -20,7 +20,6 @@
  */
 
 #include <errno.h>
-
 #ifndef WIN32
 #include <sys/socket.h> // socket before net/if.h for mac
 #include <net/if.h>
@@ -32,22 +31,21 @@ typedef int socklen_t;
 #include <iphlpapi.h>
 #endif
 
-#include <unistd.h>
-
 #include "private.h"
 
-#ifdef HAVE_GETIFADDRS
- #ifdef HAVE_LINUX_IF_PACKET_H
-   #define USE_GETIFADDRS
- #endif
+//custermized by horristic
+//modified by James Kong
+#ifdef _WIN32
+#include "unistd_d.h"
+#include <windows.h>
 #endif
-
-#ifdef USE_GETIFADDRS
-  #include <ifaddrs.h>
-  #include <linux/types.h> // required by if_packet
-  #include <linux/if_packet.h>
+#ifdef __unix
+#include <ifaddrs.h>
 #endif
-
+#ifdef __APPLE__
+#include <ifaddrs.h>
+#include <unistd.h>
+#endif
 
 enum { INITIAL_IFACE_COUNT = 10 };
 enum { IFACE_COUNT_INC = 5 };
@@ -103,7 +101,7 @@ static iface_t *new_iface(iface_t **head, iface_t **tail) {
 }
 
 
-#ifdef WIN32
+#ifdef TARGET_WIN32
 
 /*
  * Set if_head to point to a list of iface_t structures which represent the
@@ -115,6 +113,7 @@ static int get_ifaces(iface_t **if_head) {
   PIP_ADAPTER_INFO pAdapter = NULL;
   PIP_ADAPTER_INFO pAdapterInfo;
   IP_ADDR_STRING *ipAddress;
+  DWORD status;
   ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
   unsigned long net, mask;
   if_tail = NULL;
@@ -126,7 +125,7 @@ static int get_ifaces(iface_t **if_head) {
       return ARTNET_EMEM;
     }
 
-    DWORD status = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen);
+    status= GetAdaptersInfo(pAdapterInfo, &ulOutBufLen);
     if (status == NO_ERROR)
       break;
 
@@ -171,21 +170,17 @@ static int get_ifaces(iface_t **if_head) {
 
 # else // not WIN32
 
-#ifdef USE_GETIFADDRS
-
 /*
  * Check if we are interested in this interface
  * @param ifa a pointer to a ifaddr struct
  */
 static void add_iface_if_needed(iface_t **head, iface_t **tail,
                                 struct ifaddrs *ifa) {
-
   // skip down, loopback and non inet interfaces
   if (!ifa || !ifa->ifa_addr) return;
   if (!(ifa->ifa_flags & IFF_UP)) return;
   if (ifa->ifa_flags & IFF_LOOPBACK) return;
   if (ifa->ifa_addr->sa_family != AF_INET) return;
-
   iface_t *iface = new_iface(head, tail);
   struct sockaddr_in *sin = (struct sockaddr_in*) ifa->ifa_addr;
   iface->ip_addr.sin_addr = sin->sin_addr;
@@ -204,201 +199,66 @@ static void add_iface_if_needed(iface_t **head, iface_t **tail,
  * @param ift_head the address of the pointer to the head of the list
  */
 static int get_ifaces(iface_t **if_head) {
-  struct ifaddrs *ifa_list, *ifa_iter;
-  iface_t *if_tail, *if_iter;
-  struct sockaddr_ll *sll;
-  char *if_name, *cptr;
-  *if_head = if_tail = NULL;
+    struct ifaddrs *ifa_list, *ifa_iter;
+    iface_t *if_tail, *if_iter;
+//    struct sockaddr_in *sin;
+    char *if_name, *cptr;
+    *if_head = if_tail = NULL;
+//    struct sockaddr_dl *dl; 
+    if (getifaddrs(&ifa_list) != 0) {
+        artnet_error("Error getting interfaces: %s", strerror(errno));
+        return ARTNET_ENET;
+    }  
+//    //    for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next)
+//    iface = new_iface(if_head, &if_tail);
 
-  if (getifaddrs(&ifa_list) != 0) {
-    artnet_error("Error getting interfaces: %s", strerror(errno));
-    return ARTNET_ENET;
-  }
-
-  for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next)
-    add_iface_if_needed(if_head, &if_tail, ifa_iter);
-
-  // Match up the interfaces with the corrosponding AF_PACKET interface
-  // to fetch the hw addresses
-  //
-  // TODO: Will probably not work on OS X, it should
-  //      return AF_LINK -type sockaddr
-  for (if_iter = *if_head; if_iter; if_iter = if_iter->next) {
-    if_name = strdup(if_iter->if_name);
-
-    // if this is an alias, get mac of real interface
-    if ((cptr = strchr(if_name, ':')))
-      *cptr = 0;
-
-    // Find corresponding iface_t structure
-    for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next) {
-      if ((!ifa_iter->ifa_addr) || ifa_iter->ifa_addr->sa_family != AF_PACKET)
-        continue;
-
-      if (strncmp(if_name, ifa_iter->ifa_name, IFNAME_SIZE) == 0) {
-        // Found matching hw-address
-        sll = (struct sockaddr_ll*) ifa_iter->ifa_addr;
-        memcpy(if_iter->hw_addr, sll->sll_addr, ARTNET_MAC_SIZE);
-        break;
-      }
+    for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next)
+        add_iface_if_needed(if_head, &if_tail, ifa_iter);
+    
+    // Match up the interfaces with the corrosponding AF_PACKET interface
+    // to fetch the hw addresses
+    //
+    // TODO: Will probably not work on OS X, it should
+    //      return AF_LINK -type sockaddr
+    for (if_iter = *if_head; if_iter; if_iter = if_iter->next) {
+        if_name = strdup(if_iter->if_name);
+        
+        // if this is an alias, get mac of real interface
+        if ((cptr = strchr(if_name, ':')))
+            *cptr = 0;
+        
+        // Find corresponding iface_t structure
+        for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next) {
+            if ((!ifa_iter->ifa_addr) || ifa_iter->ifa_addr->sa_family != AF_INET)
+                continue;
+            
+//            if (strncmp(if_name, ifa_iter->ifa_name, IFNAME_SIZE) == 0) {
+//                // Found matching hw-address
+////                sll = (struct sockaddr_ll*) ifa_iter->ifa_addr;
+////                memcpy(if_iter->hw_addr, sll->sll_addr, ARTNET_MAC_SIZE);
+//                break;
+//            }
+        }        
+//        // Find corresponding iface_t structure
+//        for (ifa_iter = ifa_list; ifa_iter; ifa_iter = ifa_iter->ifa_next) {
+//            if ((!ifa_iter->ifa_addr) || ifa_iter->ifa_addr->sa_family != AF_INET)
+//                continue;
+//            
+//            //            if (strncmp(if_name, ifa_iter->ifa_name, IFNAME_SIZE) == 0) {
+//            // Found matching hw-address
+//            dl = (struct sockaddr_dl*)ifa_iter->ifa_addr;               
+//            sin = (struct sockaddr_in *) ifa_iter->ifa_addr;
+//            iface->ip_addr.sin_addr = sin->sin_addr;
+//            sin = (struct sockaddr_in *) ifa_iter->ifa_dstaddr;
+//            iface->bcast_addr.sin_addr = sin->sin_addr;
+//        }
+        free(if_name);
     }
-    free(if_name);
-  }
-  freeifaddrs(ifa_list);
-  return 0;
+    
+    freeifaddrs(ifa_list);
+    return 0;    
 }
 
-#else // no GETIFADDRS
-
-/*
- * Set if_head to point to a list of iface_t structures which represent the
- * interfaces on this machine
- * @param ift_head the address of the pointer to the head of the list
- */
-int get_ifaces(iface_t **if_head) {
-  struct ifconf ifc;
-  struct ifreq *ifr, ifrcopy;
-  struct sockaddr_in *sin;
-  int len, lastlen, flags;
-  char *buf, *ptr;
-  iface_t *if_tail, *iface;
-  int ret = ARTNET_EOK;
-  int sd;
-
-  *if_head = if_tail = NULL;
-
-  // create socket to get iface config
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
-
-  if (sd < 0) {
-    artnet_error("%s : Could not create socket %s", __FUNCTION__, strerror(errno));
-    ret = ARTNET_ENET;
-    goto e_return;
-  }
-
-  // first use ioctl to get a listing of interfaces
-  lastlen = 0;
-  len = INITIAL_IFACE_COUNT * sizeof(struct ifreq);
-
-  for (;;) {
-    buf = malloc(len);
-
-    if (buf == NULL) {
-      artnet_error_malloc();
-      ret = ARTNET_EMEM;
-      goto e_free;
-    }
-
-    ifc.ifc_len = len;
-    ifc.ifc_buf = buf;
-    if (ioctl(sd, SIOCGIFCONF, &ifc) < 0) {
-      if (errno != EINVAL || lastlen != 0) {
-        artnet_error("%s : ioctl error %s", __FUNCTION__, strerror(errno));
-        ret = ARTNET_ENET;
-        goto e_free;
-      }
-    } else {
-      if (ifc.ifc_len == lastlen)
-        break;
-      lastlen = ifc.ifc_len;
-    }
-    len += IFACE_COUNT_INC * sizeof(struct ifreq);
-    free(buf);
-  }
-
-  // loop through each iface
-  for (ptr = buf; ptr < buf + ifc.ifc_len;) {
-    ifr = (struct ifreq*) ptr;
-
-    // work out length here
-#ifdef HAVE_SOCKADDR_SA_LEN
-    len = max(sizeof(struct sockaddr), ifr->ifr_addr.sa_len);
-#else
-    switch (ifr->ifr_addr.sa_family) {
-#ifdef  IPV6
-      case AF_INET6:
-        len = sizeof(struct sockaddr_in6);
-        break;
-#endif
-      case AF_INET:
-      default:
-        len = sizeof(SA);
-        break;
-    }
-#endif
-
-    ptr += sizeof(ifr->ifr_name) + len;
-
-    // look for AF_INET interfaces
-    if (ifr->ifr_addr.sa_family == AF_INET) {
-      ifrcopy = *ifr;
-      if (ioctl(sd, SIOCGIFFLAGS, &ifrcopy) < 0) {
-        artnet_error("%s : ioctl error %s" , __FUNCTION__, strerror(errno));
-        ret = ARTNET_ENET;
-        goto e_free_list;
-      }
-
-      flags = ifrcopy.ifr_flags;
-      if ((flags & IFF_UP) == 0)
-        continue; //skip down interfaces
-
-      if ((flags & IFF_LOOPBACK))
-        continue; //skip lookback
-
-      iface = new_iface(if_head, &if_tail);
-      if (!iface)
-        goto e_free_list;
-
-      sin = (struct sockaddr_in *) &ifr->ifr_addr;
-      iface->ip_addr.sin_addr = sin->sin_addr;
-
-      // fetch bcast address
-#ifdef SIOCGIFBRDADDR
-      if (flags & IFF_BROADCAST) {
-        if (ioctl(sd, SIOCGIFBRDADDR, &ifrcopy) < 0) {
-          artnet_error("%s : ioctl error %s" , __FUNCTION__, strerror(errno));
-          ret = ARTNET_ENET;
-          goto e_free_list;
-        }
-
-        sin = (struct sockaddr_in *) &ifrcopy.ifr_broadaddr;
-        iface->bcast_addr.sin_addr = sin->sin_addr;
-      }
-#endif
-
-		strcpy(iface->if_name, ifr->ifr_name);
-
-      // fetch hardware address
-#ifdef SIOCGIFHWADDR
-      if (flags & SIOCGIFHWADDR) {
-        if (ioctl(sd, SIOCGIFHWADDR, &ifrcopy) < 0) {
-          artnet_error("%s : ioctl error %s", __FUNCTION__, strerror(errno));
-          ret = ARTNET_ENET;
-          goto e_free_list;
-        }
-        memcpy(&iface->hw_addr, ifrcopy.ifr_hwaddr.sa_data, ARTNET_MAC_SIZE);
-      }
-#endif
-
-    /* ok, if that all failed we should prob try and use sysctl to work out the bcast
-     * and hware addresses
-     * i'll leave that for another day
-     */
-    }
-  }
-  free(buf);
-  return ARTNET_EOK;
-
-e_free_list:
-  free_ifaces(*if_head);
-e_free:
-  free(buf);
-  close(sd);
-e_return:
-  return ret;
-}
-
-#endif // GETIFADDRS
 #endif // not WIN32
 
 
@@ -448,7 +308,7 @@ int artnet_net_init(node n, const char *preferred_ip) {
       }
     }
     if (!found) {
-      artnet_error("Cannot find ip %s", preferred_ip);
+      artnet_error("Cannot find interface by ip %s", preferred_ip);
       ret = ARTNET_ENET;
       goto e_cleanup;
     }
@@ -487,6 +347,7 @@ int artnet_net_start(node n) {
 #ifdef WIN32
     // check winsock version
     WSADATA wsaData;
+    u_long _true = 1;
     WORD wVersionRequested = MAKEWORD(2, 2);
     if (WSAStartup(wVersionRequested, &wsaData) != 0)
       return (-1);
@@ -543,8 +404,7 @@ int artnet_net_start(node n) {
       return ARTNET_ENET;
     }
 
-    u_long true = 1;
-    if (SOCKET_ERROR == ioctlsocket(sock, FIONBIO, &true)) {
+    if (SOCKET_ERROR == ioctlsocket(sock, FIONBIO, &_true)) {
 
       artnet_error("ioctlsocket", artnet_net_last_error());
       artnet_net_close(sock);
@@ -594,7 +454,7 @@ int artnet_net_recv(node n, artnet_packet p, int delay) {
     default:
       break;
   }
-
+    
   // need a check here for the amount of data read
   // should prob allow an extra byte after data, and pass the size as sizeof(Data) +1
   // then check the size read and if equal to size(data)+1 we have an error
@@ -615,7 +475,7 @@ int artnet_net_recv(node n, artnet_packet p, int delay) {
     return ARTNET_EOK;
   }
 
-  p->length = len;
+    p->length = len;
   memcpy(&(p->from), &cliAddr.sin_addr, sizeof(struct in_addr));
   // should set to in here if we need it
   return ARTNET_EOK;
@@ -639,7 +499,7 @@ int artnet_net_send(node n, artnet_packet p) {
 
   if (n->state.verbose)
     printf("sending to %s\n" , inet_ntoa(addr.sin_addr));
-
+    
   ret = sendto(n->sd,
                (char*) &p->data, // char* required for win32
                p->length,

@@ -25,11 +25,15 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#ifndef WIN32
+#ifdef WIN32
+#if !defined(__GNUC__) || __GNUC__ < 2 || __GNUC__ < 5
+#define __attribute__(x)
+#endif
+#else
 #include <netinet/in.h>
 #endif
 
-#include <artnet/common.h>
+#include <common.h>
 
 enum { ARTNET_MAX_RDM_ADCOUNT = 32 };
 

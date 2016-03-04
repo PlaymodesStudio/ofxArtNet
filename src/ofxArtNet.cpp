@@ -31,7 +31,7 @@ void ofxArtNet::init(string ip, bool verbose) {
 	artnet_set_dmx_handler(node, ofxArtNet::dmx_handler, this);
 }
 ////////////////////////////////////////////////////////////
-void ofxArtNet::setOEM(uint8 high, uint8 low) {
+void ofxArtNet::setOEM(int high, int low) {
 	artnet_setoem(node, high, low);
 }
 ////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ void ofxArtNet::setPortType(int port, artnetPortIO io, artnetPortData data) {
 	artnet_set_port_type(node, port, (artnet_port_settings_t)io, (artnet_port_data_code)data);
 }
 ////////////////////////////////////////////////////////////
-void ofxArtNet::setPortAddress(int port, artnetPortType type, uint8_t address) {
+void ofxArtNet::setPortAddress(int port, artnetPortType type, unsigned char address) {
 	artnet_set_port_addr(node, port, (artnet_port_dir_t)type, address);
 }
 ////////////////////////////////////////////////////////////
@@ -88,16 +88,16 @@ void ofxArtNet::sendPoll(string ip) {
 	artnet_send_poll(node, ip.empty() ? NULL : ip.c_str(), ARTNET_TTM_DEFAULT);
 }
 ////////////////////////////////////////////////////////////
-void ofxArtNet::sendDmx(int port, void* data, int size) {
-	artnet_send_dmx(node, port, size, (uint8_t*)data);
+void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
+	artnet_send_dmx(node, port, targetIp, size, (unsigned char*)data);
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx(ofxArtNetDmxData& dmx) {
-	sendDmx(dmx.port, dmx.data, dmx.len);
+	sendDmx(dmx.port, " " ,dmx.data, dmx.len);
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmxRaw(int universe, void* data, int size) {
-	artnet_raw_send_dmx(node, universe, size, (uint8_t*)data);
+	artnet_raw_send_dmx(node, universe, size, (unsigned char*)data);
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::threadedFunction() {
@@ -155,7 +155,7 @@ int ofxArtNet::dmx_handler(artnet_node n, int port, void *d) {
 	ofxArtNet* t = (ofxArtNet*)d;
 	
 	int len;
-	uint8_t* data = artnet_read_dmx(n, port, &len);
+	unsigned char* data = artnet_read_dmx(n, port, &len);
 	ofxArtNetDmxData dmx(data, len);
 	dmx.port = port;
 	ofNotifyEvent(t->dmxData, dmx, t);

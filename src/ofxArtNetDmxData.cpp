@@ -16,7 +16,7 @@ ofxArtNetDmxData::ofxArtNetDmxData(int len) {
 	port = 0;
 }
 //-----------------------------------------------------
-ofxArtNetDmxData::ofxArtNetDmxData(uint8_t* data, int len) {
+ofxArtNetDmxData::ofxArtNetDmxData(unsigned char* data, int len) {
 	this->data = data;
 	this->len = len;
 	this->port = 0;
@@ -28,7 +28,7 @@ ofxArtNetDmxData::~ofxArtNetDmxData() {
 //-----------------------------------------------------
 void ofxArtNetDmxData::allocate(int len) {
 	this->len = len;
-	this->data = (uint8_t*)malloc(len);
+	this->data = (unsigned char*)malloc(len);
 }
 //-----------------------------------------------------
 void ofxArtNetDmxData::destroy() {
@@ -37,6 +37,6 @@ void ofxArtNetDmxData::destroy() {
 	this->len = 0;
 }
 //-----------------------------------------------------
-void ofxArtNetDmxData::set(uint8_t val) {
+void ofxArtNetDmxData::set(unsigned char val) {
 	memset(data, val, len);
 }

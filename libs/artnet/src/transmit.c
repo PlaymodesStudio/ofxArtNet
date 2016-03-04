@@ -19,6 +19,9 @@
  */
 
 #include "private.h"
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
 
 /*
  * Send an art poll
@@ -87,7 +90,7 @@ int artnet_tx_poll_reply(node n, int response) {
 
   snprintf((char *) &reply.data.ar.nodereport,
            sizeof(reply.data.ar.nodereport),
-           "%04x [%04i] libartnet",
+           "%04hx [%04i] libartnet",
            n->state.report_code,
            n->state.ar_count);
 

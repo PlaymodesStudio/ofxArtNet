@@ -51,7 +51,7 @@ string ofxArtNetNodeEntry::getIp() {
 	return ip;
 }
 //-------------------------------------------------------------
-uint16 ofxArtNetNodeEntry::getSubnet() {
+int ofxArtNetNodeEntry::getSubnet() {
 	artnet_node_entry ne = (artnet_node_entry)node_entry;
 	return ne->sub;
 }
@@ -66,12 +66,12 @@ string ofxArtNetNodeEntry::getLongName() {
 	return (char*)ne->longname;
 }
 //-------------------------------------------------------------
-uint16 ofxArtNetNodeEntry::getPortCount() {
+int ofxArtNetNodeEntry::getPortCount() {
 	artnet_node_entry ne = (artnet_node_entry)node_entry;
 	return ne->numbports;
 }
 //-------------------------------------------------------------
-uint8 ofxArtNetNodeEntry::getPortType(int port) {
+int ofxArtNetNodeEntry::getPortType(int port) {
 	artnet_node_entry ne = (artnet_node_entry)node_entry;
 	return ne->porttypes[port];
 }
@@ -98,12 +98,12 @@ bool ofxArtNetNodeEntry::isPortOutput(int port) {
 	return ne->porttypes[port] & 0x80;
 }
 //-------------------------------------------------------------
-uint8 ofxArtNetNodeEntry::getUniverseInput(int port) {
+int ofxArtNetNodeEntry::getUniverseInput(int port) {
 	artnet_node_entry ne = (artnet_node_entry)node_entry;
 	return ne->swin[port];
 }
 //-------------------------------------------------------------
-uint8 ofxArtNetNodeEntry::getUniverseOutput(int port) {
+int ofxArtNetNodeEntry::getUniverseOutput(int port) {
 	artnet_node_entry ne = (artnet_node_entry)node_entry;
 	return ne->swout[port];
 }

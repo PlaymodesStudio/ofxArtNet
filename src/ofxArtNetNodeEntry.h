@@ -16,16 +16,16 @@ public:
 	~ofxArtNetNodeEntry();
 	
 	string	getIp();
-	uint16	getSubnet();
+	int	getSubnet();
 	string	getShortName();
 	string	getLongName();
-	uint16	getPortCount();
-	uint8	getPortType(int port);
+	int	getPortCount();
+	int	getPortType(int port);
 	string	getPortTypeName(int port);
 	bool	isPortInput(int port);
 	bool	isPortOutput(int port);
-	uint8	getUniverseInput(int port);
-	uint8	getUniverseOutput(int port);
+	int	getUniverseInput(int port);
+	int	getUniverseOutput(int port);
 	string	getMac();
 	
 private:
