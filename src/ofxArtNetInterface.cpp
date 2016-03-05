@@ -59,10 +59,14 @@ extern "C" int get_ifaces(iface_t **if_head);
 void ofxArtNetInterface::getInterfaces(vector<ofxArtNetInterface>& interfaces) {
 	
 	iface_t *ift_head = NULL;
-	int r = get_ifaces(&ift_head);
+#ifdef OF_TARGET_LINUXARMV6L
+    int r = get_ifaces(&ift_head);
+#else 
+    int r = 1;
+#endif
 	if(r != ARTNET_EOK)
 		return;
-	
+
 	iface_t *ift;
 	for (ift = ift_head; ift != NULL; ift = ift->next) {
 		
