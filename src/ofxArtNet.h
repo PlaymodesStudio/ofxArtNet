@@ -11,8 +11,13 @@
 
 #include "ofMain.h"
 #include "ofxArtNetNodeEntry.h"
-#include "ofxArtNetInterface.h"
 #include "ofxArtNetDmxData.h"
+
+#if defined TARGET_OSX
+#include "LocalAddressGrabber_Mac.h"
+#else
+#include "LocalAddressGrabber_Linux.h"
+#endif
 
 typedef void* artnet_node;
 
@@ -47,9 +52,9 @@ enum artnetPortType {
 class ofxArtNet : private ofThread {
 public:
 	
-	vector<ofxArtNetInterface>& getInterfaces();
-	
 	void init(string ip = "", bool verbose = false);
+    
+    string getIP();
 
 	void setOEM(int high, int low);
 	void setNodeType(artnetNodeType nodeType);
@@ -86,5 +91,4 @@ private:
 
 	artnet_node node;
 	vector<ofxArtNetNodeEntry*> nodes;
-	vector<ofxArtNetInterface> interfaces;
 };

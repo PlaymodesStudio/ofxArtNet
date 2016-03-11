@@ -10,15 +10,11 @@
 #include "ofxArtNet.h"
 #include "artnet.h"
 
-////////////////////////////////////////////////////////////
-vector<ofxArtNetInterface>& ofxArtNet::getInterfaces() {
-	
-	interfaces.clear();
-	
-	ofxArtNetInterface::getInterfaces(interfaces);
-	
-	return interfaces;
+string ofxArtNet::getIP(){
+    LocalAddressGrabber :: availableList();
+    return LocalAddressGrabber :: getIpAddress("en1");
 }
+
 ////////////////////////////////////////////////////////////
 void ofxArtNet::init(string ip, bool verbose) {
 	
