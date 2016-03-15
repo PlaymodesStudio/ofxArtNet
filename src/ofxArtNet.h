@@ -7,6 +7,11 @@
  *
  */
 
+
+// - Port (in the library) = Universe (according to the protocol)
+// - Universe = Port-Adress
+// - Subnet = Subnet
+
 #pragma once
 
 #include "ofMain.h"
