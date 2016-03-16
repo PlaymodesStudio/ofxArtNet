@@ -15,6 +15,16 @@ string ofxArtNet::getIP(){
     return LocalAddressGrabber :: getIpAddress("en1");
 }
 
+vector<pair<string, string>> ofxArtNet::getIfacesIps(){
+    vector<pair<string , string>> ifacesPair;
+    vector<string> ifaces = LocalAddressGrabber :: availableList();
+    for (auto iface : ifaces)
+        ifacesPair.push_back(pair<string, string>(iface, LocalAddressGrabber :: getIpAddress(iface)));
+    
+    return ifacesPair;
+
+}
+
 ////////////////////////////////////////////////////////////
 void ofxArtNet::init(string ip, bool verbose) {
 	

@@ -60,6 +60,7 @@ public:
 	void init(string ip = "", bool verbose = false);
     
     string getIP();
+    vector<pair<string, string>> getIfacesIps();
 
 	void setOEM(int high, int low);
 	void setNodeType(artnetNodeType nodeType);

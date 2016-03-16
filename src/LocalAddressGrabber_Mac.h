@@ -18,7 +18,7 @@ class LocalAddressGrabber
 {
 public:
     
-    static vector<string>& availableList(void){
+    static vector<string> availableList(void){
         struct ifaddrs *myaddrs;
         struct ifaddrs *ifa;
         struct sockaddr_in *s4;
@@ -57,6 +57,7 @@ public:
         }
         
         freeifaddrs(myaddrs);
+        return interfaces;
         
     }
     
