@@ -18,7 +18,7 @@
 #include "ofxArtNetNodeEntry.h"
 #include "ofxArtNetDmxData.h"
 
-#include "LocalAddressGrabber_Mac.h"
+#include "LocalAddressGrabber.h"
 
 typedef void* artnet_node;
 
