@@ -18,11 +18,7 @@
 #include "ofxArtNetNodeEntry.h"
 #include "ofxArtNetDmxData.h"
 
-#if defined TARGET_OSX
 #include "LocalAddressGrabber_Mac.h"
-#else
-#include "LocalAddressGrabber_Mac.h"
-#endif
 
 typedef void* artnet_node;
 
