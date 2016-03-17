@@ -151,7 +151,7 @@ int ofxArtNet::reply_handler(artnet_node node, void *pp, void *d) {
 
 	ofxArtNetNodeEntry* entry = new ofxArtNetNodeEntry(ne);
 	t->nodes.push_back(entry);
-	ofNotifyEvent(t->pollReply, entry, t);
+	ofNotifyEvent(t->pollReply, *entry, t);
 	
 	return 0;
 }

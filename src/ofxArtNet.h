@@ -81,7 +81,7 @@ public:
 	int getNodeCount();
 	ofxArtNetNodeEntry* getNode(int n);
 	
-	ofEvent<ofxArtNetNodeEntry*> pollReply;
+	ofEvent<ofxArtNetNodeEntry> pollReply;
 	ofEvent<ofxArtNetDmxData> dmxData;
 
 private:
