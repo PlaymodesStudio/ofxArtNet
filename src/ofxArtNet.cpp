@@ -12,7 +12,7 @@
 
 string ofxArtNet::getIP(){
     LocalAddressGrabber :: availableList();
-    return LocalAddressGrabber :: getIpAddress("en1");
+    return LocalAddressGrabber :: getIpAddress("en0");
 }
 
 vector<pair<string, string>> ofxArtNet::getIfacesIps(){
