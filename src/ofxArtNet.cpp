@@ -99,7 +99,7 @@ void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx(ofxArtNetDmxData& dmx) {
-	sendDmx(dmx.getPort(), dmx.getIp() ,&dmx.getData()[0], dmx.getLen());
+	sendDmx(dmx.getPort(), dmx.getIp().c_str() ,&dmx.getData()[0], dmx.getLen());
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmxRaw(int universe, void* data, int size) {
