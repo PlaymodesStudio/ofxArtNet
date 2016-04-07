@@ -12,6 +12,7 @@
 
 //-----------------------------------------------------
 ofxArtNetDmxData::ofxArtNetDmxData(int len) {
+    data.reserve(len);
 	allocate(len);
 	port = 0;
     ipTarget = " ";
