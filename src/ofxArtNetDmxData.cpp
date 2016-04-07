@@ -17,7 +17,7 @@ ofxArtNetDmxData::ofxArtNetDmxData(int len) {
     ipTarget = " ";
 }
 //-----------------------------------------------------
-ofxArtNetDmxData::ofxArtNetDmxData(unsigned char* data, int len) {
+ofxArtNetDmxData::ofxArtNetDmxData(vector<unsigned char> data, int len) {
 	this->data = data;
 	this->len = len;
 	this->port = 0;
@@ -30,15 +30,14 @@ ofxArtNetDmxData::~ofxArtNetDmxData() {
 //-----------------------------------------------------
 void ofxArtNetDmxData::allocate(int len) {
 	this->len = len;
-	this->data = (unsigned char*)malloc(len);
+    this->data.reserve(len);
 }
 //-----------------------------------------------------
 void ofxArtNetDmxData::destroy() {
-	free(this->data);
-	this->data = NULL;
+    this->data.clear();
 	this->len = 0;
 }
 //-----------------------------------------------------
 void ofxArtNetDmxData::set(unsigned char val) {
-	memset(data, val, len);
+	memset(&data, val, len);
 }

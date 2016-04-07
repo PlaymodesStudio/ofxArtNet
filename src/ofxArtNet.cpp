@@ -99,7 +99,7 @@ void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx(ofxArtNetDmxData& dmx) {
-	sendDmx(dmx.port, dmx.ipTarget ,dmx.data, dmx.len);
+	sendDmx(dmx.getPort(), dmx.getIp() ,&dmx.getData()[0], dmx.getLen());
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmxRaw(int universe, void* data, int size) {
@@ -162,7 +162,10 @@ int ofxArtNet::dmx_handler(artnet_node n, int port, void *d) {
 	
 	int len;
 	unsigned char* data = artnet_read_dmx(n, port, &len);
-	ofxArtNetDmxData dmx(data, len);
-	dmx.port = port;
+    vector<unsigned char> dataVec;
+    dataVec.reserve(len);
+    dataVec[0] = *data;
+	ofxArtNetDmxData dmx(dataVec, len);
+	dmx.setPort(port);
 	ofNotifyEvent(t->dmxData, dmx, t);
 }
