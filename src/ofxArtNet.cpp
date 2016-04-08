@@ -162,9 +162,9 @@ int ofxArtNet::dmx_handler(artnet_node n, int port, void *d) {
 	
 	int len;
 	unsigned char* data = artnet_read_dmx(n, port, &len);
-    vector<unsigned char> dataVec;
-    dataVec.reserve(len);
-    dataVec[0] = *data;
+    vector<unsigned char> dataVec(&data[0], &data[len]);
+//    dataVec.assign(len, sizeof(unsigned char));
+//    dataVec = *data;
 	ofxArtNetDmxData dmx(dataVec, len);
 	dmx.setPort(port);
 	ofNotifyEvent(t->dmxData, dmx, t);
