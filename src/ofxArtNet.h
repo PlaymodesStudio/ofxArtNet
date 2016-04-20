@@ -74,6 +74,7 @@ public:
 	
 	void sendPoll(string ip = "");
 	void sendDmx(int port, const char* targetIp, void* data, int size);
+    void sendDmx_by_SU(int port, int subnet, int universe, const char* targetIp, void* data, int size);
 	void sendDmx(ofxArtNetDmxData& dmx);
 	void sendDmxRaw(int universe, void* data, int size);
 	void sendAddress(ofxArtNetNodeEntry* entry);

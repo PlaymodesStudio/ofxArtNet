@@ -24,7 +24,11 @@ public:
     void setIp(string ip){ipTarget = ip;};
     void setData(vector<unsigned char> _data){this->data = _data;};
     void setPort(int _port){port = _port;};
+    void setUniverse(int _universe){universe = _universe;};
+    void setSubNet(int _subnet){subnet = _subnet;};
     
+    int getSubNet(){return subnet;};
+    int getUniverse(){return universe;};
     int getPort(){return port;};
     string getIp(){return ipTarget;};
     vector<unsigned char> getData(){return data;};
@@ -34,6 +38,8 @@ private:
     string ipTarget;
     int len;
     int port;
+    int universe;
+    int subnet;
     vector<unsigned char> data;
     
 };

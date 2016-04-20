@@ -97,9 +97,17 @@ void ofxArtNet::sendPoll(string ip) {
 void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
 	artnet_send_dmx(node, port, targetIp, size, (unsigned char*)data);
 }
+
+////////////////////////////////////////////////////////////
+void ofxArtNet::sendDmx_by_SU(int port,int subnet, int universe, const char* targetIp, void* data, int size) {
+    artnet_send_dmx_by_custom_SU(node, port, subnet, universe, targetIp, size, (unsigned char*)data);
+    cout<<universe<<endl;
+}
+
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx(ofxArtNetDmxData& dmx) {
-	sendDmx(dmx.getPort(), dmx.getIp().c_str() ,dmx.getData().data(), dmx.getLen());
+//	sendDmx(dmx.getPort(), dmx.getIp().c_str() ,dmx.getData().data(), dmx.getLen());
+    sendDmx_by_SU(dmx.getPort(), dmx.getSubNet(), dmx.getUniverse(), dmx.getIp().c_str() ,dmx.getData().data(), dmx.getLen());
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmxRaw(int universe, void* data, int size) {
