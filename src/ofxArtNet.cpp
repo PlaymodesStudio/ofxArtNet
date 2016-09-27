@@ -101,7 +101,7 @@ void ofxArtNet::sendDmx(int port, const char* targetIp, void* data, int size) {
 ////////////////////////////////////////////////////////////
 void ofxArtNet::sendDmx_by_SU(int port,int subnet, int universe, const char* targetIp, void* data, int size) {
     artnet_send_dmx_by_custom_SU(node, port, subnet, universe, targetIp, size, (unsigned char*)data);
-    cout<<universe<<endl;
+    //cout<<universe<<endl;
 }
 
 ////////////////////////////////////////////////////////////
