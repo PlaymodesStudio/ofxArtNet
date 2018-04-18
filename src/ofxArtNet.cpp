@@ -11,8 +11,12 @@
 #include "artnet.h"
 
 string ofxArtNet::getIP(){
-    LocalAddressGrabber :: availableList();
-    return LocalAddressGrabber :: getIpAddress("en0");
+    auto list =  LocalAddressGrabber :: availableList();
+    for(auto iface : list){
+        if(ofStringTimesInString(iface, "en") != 0){
+            return LocalAddressGrabber :: getIpAddress(iface);
+        }
+    }
 }
 
 vector<pair<string, string>> ofxArtNet::getIfacesIps(){
@@ -22,12 +26,11 @@ vector<pair<string, string>> ofxArtNet::getIfacesIps(){
         ifacesPair.push_back(pair<string, string>(iface, LocalAddressGrabber :: getIpAddress(iface)));
     
     return ifacesPair;
-
 }
 
 ////////////////////////////////////////////////////////////
 void ofxArtNet::init(string ip, bool verbose) {
-	
+    if(ip == "") ip = getIP();
 	node = artnet_new((ip.empty() ? NULL : ip.c_str()), verbose);
 	if (node == NULL) {
 		ofLog(OF_LOG_ERROR, artnet_strerror());
@@ -74,7 +77,7 @@ void ofxArtNet::start() {
 		ofLog(OF_LOG_ERROR, artnet_strerror());
 		return;
 	}
-	startThread(true, false);
+	startThread();
 }
 ////////////////////////////////////////////////////////////
 void ofxArtNet::stop() {
