@@ -71,6 +71,8 @@ public:
 	void start();
 	void stop();
 	void close();
+    
+    bool isRunning(){return isThreadRunning();};
 	
 	void sendPoll(string ip = "");
 	void sendDmx(int port, const char* targetIp, void* data, int size);
